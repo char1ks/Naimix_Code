@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Список команд</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0; /* Убираем отступы */
+            overflow: hidden; /* Отключаем прокрутку */
+        }
+        canvas {
+            position: absolute; /* Абсолютное позиционирование */
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1; /* Устанавливаем канвас на задний план */
+        }
+        .team-container {
+            max-width: 600px;
+            margin: auto;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            position: relative; /* Относительное позиционирование для контейнера */
+            z-index: 1; /* Устанавливаем контейнер выше канваса */
+            background: transparent; /* Полностью прозрачный фон */
+        }
+        h1 {
+            text-align: center;
+            color: white;
+        }
+        .teams-list {
+            display: flex; /* Используем flexbox для размещения команд в одной строке */
+            flex-wrap: wrap; /* Позволяем элементам переноситься на следующую строку */
+            gap: 10px; /* Отступы между командами */
+        }
+        .team {
+            display: flex;
+            flex-direction: column; /* Вертикальное размещение элементов внутри команды */
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 15px; /* Закругленные углы */
+            background: rgba(255, 255, 255, 0.3); /* Полупрозрачный фон для команд */
+            width: calc(20% - 10px); /* Ширина команды, чтобы вмещалось 5 в строку с учетом отступов */
+            height: 100px; /* Фиксированная высота для квадратной формы */
+            position: relative; /* Для позиционирования кнопки */
+        }
+        .team-name {
+            color: white; /* Белый цвет текста для названия команды */
+            font-weight: bold; /* Жирный шрифт */
+            font-size: 16px; /* Размер шрифта */
+            text-align: center; /* Центрируем текст */
+            margin-bottom: 10px; /* Отступ снизу для отделения от кнопки */
+        }
+        .choose-button {
+            background-color: white; /* Белый цвет кнопки */
+            color: black; /* Черный текст на кнопке */
+            border: none;
+            border-radius: 4px; /* Закругленные углы кнопки */
+            padding: 10px;
+            cursor: pointer;
+            width: 100%; /* Кнопка занимает всю ширину команды */
+            height: 40px; /* Высота кнопки */
+        }
+        .choose-button:hover {
+            background-color: #e0e0e0; /* Цвет кнопки при наведении */
+        }
+        .confirmation-dialog {
+        margin-top:20px;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: rgba(255, 255, 255, 0.9); /* Полупрозрачный фон */
+            padding: 20px;
+            border-radius: 15px; /* Закругленные углы */
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2); /* Тень для окошка */
+            z-index: 1000; /* На переднем плане */
+            width: 300px; /* Ширина окошка */
+            text-align: center; /* Центрируем текст */
+        }
+        .confirmation-dialog p {
+            font-size: 18px; /* Увеличенный размер шрифта */
+            color: #333; /* Цвет текста */
+            margin: 10px 0; /* Отступы для текста */
+        }
+        .dialog-button {
+            background-color: white; /* Цвет кнопки "Добавить" */
+            color: black; /* Белый текст на кнопке */
+            border: black;
+            border-radius: 4px; /* Закругленные углы кнопки */
+            padding: 10px 15px; /* Отступы для кнопки */
+            cursor: pointer;
+            margin: 5px; /* Отступы между кнопками */
+            transition: background-color 0.3s; /* Плавный переход цвета */
+        }
+        .dialog-button:hover {
+            background-color: #4cae4c; /* Цвет кнопки при наведении */
+        }
+        b {
+            position: fixed;
+            color: white;
+            padding: 1rem;
+            font-family: monospace;
+            background: rgba(0, 0, 0, 0.8);
+        }
+    </style>
+</head>
+<body>
+<canvas id="background-canvas"></canvas> <!-- Добавляем канвас для фона -->
+<div class="team-container">
+    <h1>Список команд</h1>
+    <div class="teams-list" id="teams-list"></div> <!-- Обернули в div с классом для flexbox -->
+</div>
+<script>
+    const canvas = document.getElementById('background-canvas');
+    canvas.width = innerWidth * 2;
+    canvas.height = innerHeight * 2;
+    const ctx = canvas.getContext('2d');
+    const width = canvas.width;
+    const height = canvas.height;
+    canvas.style.width = innerWidth + 'px';
+    canvas.style.height = innerHeight + 'px';
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.1)';
+    ctx.fillRect(0, 0, width, height);
+    let mx = 0,
+        my = 0;
+    onpointermove = (e) => {
+        mx = e.clientX - innerWidth;
+        my = e.clientY / 300;
+    }
+    const r = (n = 1) => Math.random() * n;
+    function dejong(anchorX, anchorY) {
+        const aOffset = (Math.random() - 0.5) * 2;
+        const bOffset = (Math.random() - 0.5) * 2;
+        const cOffset = (Math.random() - 0.5) * 2;
+        const dOffset = (Math.random() - 0.5) * 2;
+        let sx = Math.random() * 2 - 1;
+        let sy = Math.random() * 2 - 1;
+        let s = 20 + 240 * Math.random() * Math.random();
+        let msx = 1 / (10 + Math.random() * 1000);
+        let msy = 1 / (100 + Math.random() * 1000);
+        let ox = 0;
+        let fns = [];
+        for (let i = 0; i < 4; i++) fns.push(['sin', 'cos'][~~r(2)]);
+        let t = 0;
+        let rr = Math.PI * 2 * Math.random();
+        return function () {
+            const a = 1.4 + aOffset + (mx + ox) * msx;
+            const b = -2.3 + bOffset + my * msy;
+            const c = 2.4 + cOffset + my * msy;
+            const d = -2.1 + dOffset - (mx + ox) * msx;
+            let x = sx + t;
+            let y = sy + t;
+            t += 0.0001;
+            ctx.translate(anchorX, anchorY);
+            ctx.rotate(rr);
+            for (let i = 0; i < 500; i++) {
+                let newX = Math[fns[0]](a * y) - Math[fns[2]](b * x);
+                let newY = Math[fns[1]](c * x) - Math[fns[3]](d * y);
+                x = newX;
+                y = newY;
+                const plotX = x * s;
+                const plotY = y * s;
+                ctx.fillStyle = 'rgba(255, 255, 255, 1)';
+                ctx.fillRect(plotX, plotY, 2, 2);
+            }
+            ctx.setTransform(1, 0, 0, 1, 0, 0);
+        }
+    }
+    let attractors = [];
+    function gen() {
+        attractors = [];
+        for (let i = 0; i < 20; i++) {
+            attractors.push(dejong(Math.random() * width, Math.random() * height));
+        }
+    }
+    gen();
+    let tim;
+    onresize = e => {
+        canvas.width = innerWidth * 2;
+        canvas.height = innerHeight * 2;
+        canvas.style.width = innerWidth + 'px';
+        canvas.style.height = innerHeight + 'px';
+        clearTimeout(tim);
+        tim = setTimeout(() => {
+            attractors = [];
+            gen();
+        }, 200);
+    }
+    onclick = gen;
+    function loop() {
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        attractors.forEach((fn) => fn());
+        requestAnimationFrame(loop);
+    }
+    loop();
+    const employeeId = [[${employeeId}]]; // Получаем employeeId из модели
+    async function fetchTeams() {
+        try {
+            const response = await fetch('/team/api/getAll_teams');
+            const teams = await response.json();
+            const teamsList = document.getElementById('teams-list');
+            teams.forEach(team => {
+                const teamDiv = document.createElement('div');
+                teamDiv.classList.add('team');
+                teamDiv.innerHTML = `
+                    <span class="team-name">${team.nomination} (${team.team_class})</span>
+                    <button class="choose-button" onclick="chooseTeam(${team.id})">Выбрать</button>
+                `;
+                teamsList.appendChild(teamDiv);
+            });
+        } catch (error) {
+            console.error('Ошибка при получении команд:', error);
+        }
+    }
+    async function chooseTeam(teamId) {
+        const url = `/team/api/choose/${teamId}/${employeeId}`; // Формируем URL для POST-запроса
+        try {
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+            if (response.ok) {
+                const data = await response.text();
+                const message = data;
+                showConfirmationDialog(message, teamId, employeeId);
+            } else {
+                alert('Ошибка при выборе команды.');
+            }
+        } catch (error) {
+            console.error('Ошибка:', error);
+            alert('Произошла ошибка при отправке запроса.');
+        }
+    }
+    function showConfirmationDialog(message, teamId, employeeId) {
+        const confirmationContainer = document.createElement('div');
+        confirmationContainer.className = 'confirmation-dialog'; // Добавляем класс для стилизации
+        const messageElement = document.createElement('p');
+        messageElement.textContent = message;
+        const addButton = document.createElement('button');
+        addButton.textContent = 'Добавить';
+        addButton.className = 'dialog-button'; // Добавляем класс для стилизации кнопки
+        addButton.onclick = () => {
+            permitChooseTeam(teamId, employeeId);
+            document.body.removeChild(confirmationContainer);
+        };
+        const cancelButton = document.createElement('button');
+        cancelButton.textContent = 'Не добавлять';
+        cancelButton.className = 'dialog-button'; // Добавляем класс для стилизации кнопки
+        cancelButton.onclick = () => {
+            document.body.removeChild(confirmationContainer);
+        };
+        confirmationContainer.appendChild(messageElement);
+        confirmationContainer.appendChild(addButton);
+        confirmationContainer.appendChild(cancelButton);
+        document.body.appendChild(confirmationContainer);
+    }
+    async function permitChooseTeam(teamId, employeeId) {
+        const url = `/team/api/permit_choose_team/${teamId}/${employeeId}`;
+        try {
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+            if (response.ok) {
+                alert('Сотрудник успешно добавлен в команду!');
+               }
+
+              window.location.href = `http://localhost:8080/employee/pageBetweenTaroAndCosmo/${employeeId}`;
+        } catch (error) {
+            console.error('Ошибка:', error);
+            alert('Произошла ошибка при отправке запроса.');
+        }
+    }
+    fetchTeams();
+</script>
+</body>
+</html>

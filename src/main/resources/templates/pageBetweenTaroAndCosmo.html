@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Космограммы и Таро</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" integrity="sha384-k6RqeWeci5ZR/Lv4MR0sA0FfDOMyXz5E6vC0C7u6Qj1e3R5xJ6X5QZ5k5R2n0F" crossorigin="anonymous">
+    <style>
+        @import url('https://fonts.googleapis.com/css?family=Roboto:100,300,400,700');
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: #FF6F20; /* Оранжевый */
+            color: #FFFFFF; /* Белый */
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+        }
+        h1 {
+            font-size: 48px;
+            text-transform: uppercase;
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+        }
+        a {
+            font-size: 24px;
+            text-decoration: none;
+            color: #FFFFFF; /* Белый */
+            background-color: #E65C17; /* Темнее оранжевый */
+            padding: 15px 30px;
+            border-radius: 5px;
+            margin: 10px;
+            transition: background-color 0.3s;
+        }
+        a:hover {
+            background-color: #FF6F20; /* Оранжевый */
+        }
+        .background-text {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            z-index: -1;
+            opacity: 0.1; /* Полупрозрачный текст */
+            font-size: 5rem; /* Размер шрифта */
+            font-weight: bold;
+            text-align: center;
+            pointer-events: none; /* Отключаем взаимодействие с текстом */
+        }
+        .background-text div {
+            position: absolute;
+            transform-origin: center;
+        }
+        .background-text div:nth-child(1) {
+            color: #3b8a3a;
+            transform: rotate(-20deg);
+            left: 10%;
+            top: 20%;
+        }
+        .background-text div:nth-child(2) {
+            color: #ff6f20;
+            transform: rotate(15deg);
+            left: 20%;
+            top: 40%;
+        }
+        .background-text div:nth-child(3) {
+            color: #3b8a3a;
+            transform: rotate(-10deg);
+            left: 30%;
+            top: 60%;
+        }
+        .background-text div:nth-child(4) {
+            color: #ff6f20;
+            transform: rotate(5deg);
+            left: 40%;
+            top: 20%;
+        }
+        .background-text div:nth-child(5) {
+            color: #3b8a3a;
+            transform: rotate(25deg);
+            left: 50%;
+            top: 40%;
+        }
+        .background-text div:nth-child(6) {
+            color: #ff6f20;
+            transform: rotate(-15deg);
+            left: 60%;
+            top: 60%;
+        }
+        .background-text div:nth-child(7) {
+            color: #3b8a3a;
+            transform: rotate(10deg);
+            left: 70%;
+            top: 20%;
+        }
+        .background-text div:nth-child(8) {
+            color: #ff6f20;
+            transform: rotate(-5deg);
+            left: 80%;
+            top: 40%;
+        }
+        .background-text div:nth-child(9) {
+            color: #3b8a3a;
+            transform: rotate(30deg);
+            left: 90%;
+            top: 60%;
+        }
+        .background-text div:nth-child(10) {
+            color: #ff6f20;
+            transform: rotate(-25deg);
+            left: 10%;
+            top: 20%;
+        }
+    </style>
+</head>
+<body>
+<div class="background-text">
+    <div>🪄 Магия</div>
+    <div>🔮 Гадание</div>
+    <div>🧙‍♀️ Баба Яга</div>
+    <div>🌌 Звезды</div>
+    <div>🔭 Астрология</div>
+    <div>🌠 Гадания</div>
+    <div>📊 Отчеты</div>
+    <div>📈 Диаграммы</div>
+    <div>📉 Анализ</div>
+    <div>🤖 Помощь</div>
+</div>
+<h1>Выберите действие</h1>
+<a th:href="@{/cosmograms/{employeeId}(employeeId=${employeeId})}">Просмотреть космограммы</a>
+<a th:href="@{/tarot/choose/{employeeId}(employeeId=${employeeId})}">Разложить карты Таро</a>
+</body>
+</html>

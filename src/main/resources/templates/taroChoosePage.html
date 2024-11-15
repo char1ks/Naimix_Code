@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Карты Таро</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #2c3e50;
+            color: #ecf0f1;
+            margin: 0;
+            overflow: hidden; /* Скрываем прокрутку */
+        }
+        /* Настройки канваса */
+        canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: 1; /* Устанавливаем z-index ниже карточек */
+        }
+        .cards {
+            height: 600px;
+            display: flex;
+            flex-direction: row;
+            justify-content: center; /* Центрируем карточки */
+            align-items: center; /* Центрируем карточки по вертикали */
+            overflow: auto;
+            gap: 20px; /* Увеличиваем расстояние между карточками */
+            position: relative; /* Для абсолютного позиционирования пузырьков */
+            z-index: 2; /* Устанавливаем z-index выше канваса */
+            margin-top: 150px; /* Добавляем отступ сверху для центрирования */
+        }
+        .card {
+            position: relative;
+            width: 399px;
+            height: 100%;
+            overflow: hidden;
+            background: rgba(255, 0, 0, 0.5); /* Полупрозрачный фон */
+            cursor: pointer;
+            border-radius: 10px; /* Скругляем углы карточек */
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2); /* Добавляем тень */
+            transition: transform 0.3s;
+        }
+        .card__image {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-size: cover;
+            background-position: center;
+            opacity: 0.8; /* Полупрозрачность изображения */
+        }
+        .card__text {
+            position: absolute;
+            padding: 10px;
+            font-size: 20px;
+            bottom: 10px;
+            left: 40%;
+            color: white;
+            z-index: 2;
+        }
+        .replace-button {
+            display: none; /* Скрываем кнопку по умолчанию */
+            position: absolute;
+            bottom: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: rgba(0, 0, 0, 0.7);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .card:hover .replace-button {
+            display: block; /* Показываем кнопку при наведении */
+        }
+        .card:hover {
+            transform: scale(1.05);
+        }
+
+/* Стили для кнопки "Отправить" */
+#submit-button {
+    position: absolute; /* Абсолютное позиционирование */
+    bottom: 20px; /* Отступ от нижней грани */
+    left: 50%; /* Центрируем по горизонтали */
+    transform: translateX(-50%); /* Центрируем по горизонтали */
+    padding: 10px 20px;
+    background-color: #e74c3c; /* Красный фон */
+    color: white; /* Белый текст */
+    border: none; /* Без рамки */
+    border-radius: 5px; /* Скругленные углы */
+    font-size: 18px; /* Размер шрифта */
+    cursor: pointer; /* Указатель при наведении */
+    transition: background-color 0.3s; /* Плавный переход фона */
+    z-index: 2; /* Устанавливаем z-index выше канваса */
+}
+        #submit-button:hover {
+            background-color: #c0392b; /* Темнее при наведении */
+        }
+    </style>
+</head>
+<body>
+<canvas id='c'></canvas>
+<div class="cards">
+    <div class="card" data-card-id="1">
+        <div class="card__image" style="background-image: url('https://img.freepik.com/free-vector/hand-drawn-mystical-tarot-mobile-wallpaper_52683-80184.jpg');"></div>
+        <div class="card__text">Наведись</div>
+        <button class="replace-button">Заменить</button>
+    </div>
+    <div class="card" data-card-id="2">
+        <div class="card__image" style="background-image: url('https://img.freepik.com/free-vector/hand-drawn-mystical-tarot-mobile-wallpaper_52683-80184.jpg');"></div>
+        <div class="card__text">На</div>
+        <button class="replace-button">Заменить</button>
+    </div>
+    <div class="card" data-card-id="3">
+        <div class="card__image" style="background-image: url('https://img.freepik.com/free-vector/hand-drawn-mystical-tarot-mobile-wallpaper_52683-80184.jpg');"></div>
+        <div class="card__text">Меня</div>
+        <button class="replace-button">Заменить</button>
+    </div>
+</div>
+<button id="submit-button">Отправить</button>
+
+<script>
+    // Массив для хранения выбраных карт
+    let selectedCards = [];
+
+    // Генерация пузырьков
+    function createBubble() {
+        const bubble = document.createElement('div');
+        bubble.classList.add('bubble');
+        const size = Math.random() * 40 + 20; // Размер пузырька от 20 до 60px
+        bubble.style.width = `${size}px`;
+        bubble.style.height = `${size}px`;
+        bubble.style.left = `${Math.random() * 100}vw`; // Случайная позиция по горизонтали
+        bubble.style.backgroundColor = `rgba(255, 255, 255, ${Math.random() * 0.6 + 0.3})`; // Случайный цвет пузырька
+        document.body.appendChild(bubble);
+        // Удаляем пузырек после анимации
+        bubble.addEventListener('animationend', () => {
+            bubble.remove();
+        });
+    }
+    // Создаем пузырьки каждые 1.5 секунды
+    setInterval(createBubble, 1500);
+
+    document.querySelectorAll('.card').forEach(card => {
+        const replaceButton = card.querySelector('.replace-button');
+        const cardId = card.getAttribute('data-card-id');
+
+        card.addEventListener('mouseenter', () => {
+            // Проверяем, уже загружена ли карта
+            if (!card.classList.contains('loaded')) {
+                fetch(`/tarot/api/get/${cardId}`)
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('Сеть ответа не в порядке');
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        if (data && data.length > 0) {
+                            const tarotCard = data[0]; // Получаем первую карту из ответа
+                            card.querySelector('.card__image').style.backgroundImage = `url(${tarotCard.image_url})`;
+                            card.querySelector('.card__text').textContent = ''; // Убираем текст
+                            card.classList.add('loaded'); // Помечаем карту как загруженную
+                            selectedCards[cardId - 1] = tarotCard; // Сохраняем выбранную карту
+                        } else {
+                            console.error('Нет данных для отображения');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Ошибка:', error);
+                    });
+            }
+        });
+
+        replaceButton.addEventListener('click', () => {
+            fetch(`/tarot/api/get/${cardId}`)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Сеть ответа не в порядке');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if (data && data.length > 0) {
+                        const tarotCard = data[0]; // Получаем новую карту из ответа
+                        card.querySelector('.card__image').style.backgroundImage = `url(${tarotCard.image_url})`;
+                        selectedCards[cardId - 1] = tarotCard; // Обновляем выбранную карту
+                    } else {
+                        console.error('Нет данных для отображения');
+                    }
+                })
+                .catch(error => {
+                    console.error('Ошибка:', error);
+                });
+        });
+    });
+
+    document.getElementById('submit-button').addEventListener('click', () => {
+        const pathParts = window.location.pathname.split('/');
+        const employeeId = pathParts[pathParts.length - 1]; // Предполагаем, что ID сотрудника в конце URL
+        fetch(`/employee/api/setTarot/${employeeId}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(selectedCards) // Отправляем выбранные карты
+        })
+        .then(response => {
+            if (response.ok) {
+                  window.location.href = `http://localhost:8080/team/choose/${employeeId}`;
+            } else {
+                alert('Ошибка при отправке карт.');
+            }
+        })
+        .catch(error => {
+            console.error('Ошибка:', error);
+            alert('Ошибка при отправке карт.');
+        });
+    });
+
+    var c = document.getElementById("c");
+    var ctx = c.getContext("2d");
+    var cw = c.width = window.innerWidth;
+    var ch = c.height = window.innerHeight;
+    var cx = cw / 2,
+      cy = ch / 2;
+    var rad = Math.PI / 180;
+    var frames = 0;
+    var requestId = null;
+    ctx.lineWidth = 3;
+    ctx.strokeStyle = "white";
+    ctx.fillStyle = "rgba(0,0,0,1)";
+    var Amplitude = 50,
+      amplitude;
+    var step = .5;
+    var W = 360 * step;
+    var I = 1 / step;
+    var offset;
+    function Draw() {
+      frames += 3;
+      ctx.clearRect(0, 0, cw, ch);
+      for (var Y = -Amplitude; Y < ch + Amplitude; Y += 10) {
+        offset = cx + 100 * Math.sin(Y * rad) - 100;
+        amplitude = Amplitude * Math.sin((frames + Y) * rad);
+        ctx.beginPath();
+        ctx.moveTo(0, Y + 3 * Amplitude);
+        for (var x = 0; x < cw; x++) {
+          if (x < offset || x > offset + (360 * step)) {
+            y = Y;
+          } else {
+            y = amplitude * Math.cos(rad * (x - offset) * I) + Y - amplitude;
+          }
+          ctx.lineTo(x, y);
+        }
+        ctx.lineTo(cw, Y + 3 * Amplitude);
+        ctx.closePath();
+        ctx.stroke();
+        ctx.fill();
+      }
+      requestId = window.requestAnimationFrame(Draw);
+    }
+    function Init() {
+      if (requestId) {
+        window.cancelAnimationFrame(requestId);
+        requestId = null;
+      }
+      cw = c.width = window.innerWidth;
+      ch = c.height = window.innerHeight;
+      cx = cw / 2, cy = ch / 2;
+      frames = 0;
+      Amplitude = 50, amplitude;
+      step = .5;
+      W = 360 * step;
+      I = 1 / step;
+      ctx.lineWidth = 3;
+      ctx.strokeStyle = "white";
+      ctx.fillStyle = "rgba(0,0,0,1)";
+      requestId = window.requestAnimationFrame(Draw);
+    }
+    window.setTimeout(function() {
+      Init();
+      window.addEventListener('resize', Init, false);
+    }, 15);
+</script>
+</body>
+</html>

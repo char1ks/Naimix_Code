@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Создание космограммы</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css?family=Roboto:100,300,400,700');
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: #FF6F20; /* Оранжевый */
+            color: #FFFFFF; /* Белый */
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+        }
+        h1 {
+            font-size: 48px;
+            text-transform: uppercase;
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+        }
+        label {
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+        input[type="number"], input[type="text"], select {
+            font-size: 18px;
+            padding: 10px;
+            margin-bottom: 20px;
+            border: 2px solid #FFFFFF; /* Белый */
+            border-radius: 5px;
+            background-color: #FF6F20; /* Оранжевый */
+            color: #FFFFFF; /* Белый */
+        }
+        button {
+            font-size: 24px;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 5px;
+            background-color: #FFFFFF; /* Белый */
+            color: #FF6F20; /* Оранжевый */
+            cursor: pointer;
+            transition: background-color 0.3s, color 0.3s;
+        }
+        button:hover {
+            background-color: #E65C17; /* Темнее оранжевый */
+            color: #FFFFFF; /* Белый */
+        }
+        .background-text {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            z-index: -1;
+            opacity: 0.1; /* Полупрозрачный текст */
+            font-size: 5rem; /* Размер шрифта */
+            font-weight: bold;
+            text-align: center;
+            pointer-events: none; /* Отключаем взаимодействие с текстом */
+        }
+        .background-text div {
+            position: absolute;
+            transform-origin: center;
+        }
+        .background-text div:nth-child(1) {
+            color: #FFFFFF; /* Белый */
+            transform: rotate(-20deg);
+            left: 10%;
+            top: 20%;
+        }
+        .background-text div:nth-child(2) {
+            color: #FF6F20; /* Оранжевый */
+            transform: rotate(15deg);
+            left: 20%;
+            top: 40%;
+        }
+        .background-text div:nth-child(3) {
+            color: #FFFFFF; /* Белый */
+            transform: rotate(-10deg);
+            left: 30%;
+            top: 60%;
+        }
+        .background-text div:nth-child(4) {
+            color: #FF6F20; /* Оранжевый */
+            transform: rotate(5deg);
+            left: 40%;
+            top: 20%;
+        }
+        .background-text div:nth-child(5) {
+            color: #FFFFFF; /* Белый */
+            transform: rotate(25deg);
+            left: 50%;
+            top: 40%;
+        }
+        .background-text div:nth-child(6) {
+            color: #FF6F20; /* Оранжевый */
+            transform: rotate(-15deg);
+            left: 60%;
+            top: 60%;
+        }
+        .background-text div:nth-child(7) {
+            color: #FFFFFF; /* Белый */
+            transform: rotate(10deg);
+            left: 70%;
+            top: 20%;
+        }
+        .background-text div:nth-child(8) {
+            color: #FF6F20; /* Оранжевый */
+            transform: rotate(-5deg);
+            left: 80%;
+            top: 40%;
+        }
+        .background-text div:nth-child(9) {
+            color: #FFFFFF; /* Белый */
+            transform: rotate(30deg);
+            left: 90%;
+            top: 60%;
+        }
+        .background-text div:nth-child(10) {
+            color: #FF6F20; /* Оранжевый */
+            transform: rotate(-25deg);
+            left: 10%;
+            top: 20%;
+        }
+    </style>
+    <script>
+        async function createCosmogram() {
+            // Извлекаем employeeId из URL
+            const urlParts = window.location.pathname.split('/');
+            const employeeId = urlParts[urlParts.length - 1]; // Предполагаем, что ID находится в конце URL
+            const hour = document.getElementById("hour").value || 0; // Если не указано, ставим 0
+            const minute = document.getElementById("minute").value || 0; // Если не указано, ставим 0
+            const longitude = document.getElementById("longitude").value;
+            const latitude = document.getElementById("latitude").value;
+            const nation = document.getElementById("nation").value;
+            const timezone = document.getElementById("timezone").value; // Получаем выбранный часовой пояс
+
+            // Создаем объект для отправки
+            const cosmogramData = {
+                hour: hour,
+                minute: minute,
+                longitude: parseFloat(longitude),
+                latitude: parseFloat(latitude),
+                nation: nation,
+                timezone: timezone
+            };
+
+            try {
+                const response = await fetch(`/cosmograms/api/transDTO/${employeeId}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(cosmogramData)
+                });
+
+                if (response.ok) {
+                    const result = await response.json(); // Получаем данные в формате JSON
+                    console.log(result); // Выводим данные в консоль
+                    alert(JSON.stringify(result, null, 2)); // Преобразуем объект в строку JSON для отображения
+                    // Теперь отправляем данные на второй эндпоинт
+                    await sendToGetCosmogram(result);
+                } else {
+                    throw new Error('Network response was not ok');
+                }
+            } catch (error) {
+                console.error("Ошибка:", error);
+                alert("Произошла ошибка при создании космограммы.");
+            }
+        }
+
+        async function sendToGetCosmogram(data) {
+            try {
+                const response = await fetch('/cosmograms/api/getCosmogramm', {
+                    method: 'POST', // Используем GET метод
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(data) // Отправляем данные
+                });
+
+                if (response.ok) {
+                    const result = await response.json(); // Получаем данные в формате JSON
+
+                    const svgContainer = document.createElement('div');
+                      svgContainer.style.position = 'fixed'; // Фиксированное позиционирование
+            svgContainer.style.top = '0'; // Сверху
+            svgContainer.style.left = '0'; // Слева
+            svgContainer.style.width = '100%'; // Ширина 100%
+            svgContainer.style.height = '100%'; // Высота 100%
+            svgContainer.style.overflow = 'auto'; // Позволяет прокручивать содержимое
+
+            svgContainer.innerHTML = result; // Вставляем SVG
+
+                    svgContainer.innerHTML = JSON.stringify(result, null, 2); // Вставляем SVG
+                    document.body.innerHTML = ''; // Очищаем текущее содержимое body
+                    document.body.appendChild(svgContainer); // Добавляем SVG в body
+
+
+                } else {
+                    throw new Error('Network response was not ok');
+                }
+            } catch (error) {
+                console.error("Ошибка:", error);
+                alert("Произошла ошибка при получении космограммы.");
+            }
+        }
+    </script>
+</head>
+<body>
+<div class="background-text">
+    <div>🪄 Магия</div>
+    <div>🔮 Гадание</div>
+    <div>🧙‍♀️ Баба Яга</div>
+    <div>🌌 Звезды</div>
+    <div>🔭 Астрология</div>
+    <div>🌠 Гадания</div>
+    <div>📊 Отчеты</div>
+    <div>📈 Диаграммы</div>
+    <div>📉 Анализ</div>
+    <div>🤖 Помощь</div>
+</div>
+<h1>Введите данные для космограммы</h1>
+<label for="hour">Час рождения (если есть):</label>
+<input type="number" id="hour" name="hour"><br><br>
+<label for="minute">Минуты (если есть):</label>
+<input type="number" id="minute" name="minute"><br><br>
+<label for="longitude">Долгота:</label>
+<input type="number" id="longitude" name="longitude" step="0.0000001" required><br><br>
+<label for="latitude">Широта:</label>
+<input type="number" id="latitude" name="latitude" step="0.0000001" required><br><br>
+<label for="nation">Страна:</label>
+<input type="text" id="nation" name="nation" required><br><br>
+<label for="timezone">Часовой пояс:</label>
+<select id="timezone" name="timezone" required>
+    <option value="" disabled selected>Выберите часовой пояс</option>
+    <option value="Africa/Abidjan">Africa/Abidjan</option>
+    <option value="Africa/Algiers">Africa/Algiers</option>
+    <option value="Africa/Cairo">Africa/Cairo</option>
+    <option value="America/New_York">America/New_York</option>
+    <option value="America/Los_Angeles">America/Los_Angeles</option>
+    <option value="Asia/Tokyo">Asia/Tokyo</option>
+    <option value="Asia/Shanghai">Asia/Shanghai</option>
+    <option value="Australia/Sydney">Australia/Sydney</option>
+    <option value="Europe/Berlin">Europe/Berlin</option>
+    <option value="Europe/London">Europe/London</option>
+    <option value="Europe/Paris">Europe/Paris</option>
+    <option value="Europe/Rome">Europe/Rome</option>
+    <option value="Europe/Moscow">Europe/Moscow</option>
+    <option value="Pacific/Auckland">Pacific/Auckland</option>
+    <option value="America/Toronto">America/Toronto</option>
+    <option value="America/Chicago">America/Chicago</option>
+    <option value="America/Sao_Paulo">America/Sao_Paulo</option>
+    <option value="Asia/Dubai">Asia/Dubai</option>
+    <option value="Asia/Kolkata">Asia/Kolkata</option>
+    <option value="Asia/Seoul">Asia/Seoul</option>
+    <option value="Pacific/Honolulu">Pacific/Honolulu</option>
+</select><br><br>
+<button type="button" onclick="createCosmogram()">Создать космограмму</button>
+</body>
+</html>

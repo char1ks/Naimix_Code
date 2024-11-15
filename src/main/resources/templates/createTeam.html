@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Создание команды</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 20px;
+        }
+        .form-container {
+            max-width: 400px;
+            margin: auto;
+            background: white;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            color: #555;
+        }
+        input[type="text"] {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        button {
+            width: 100%;
+            padding: 10px;
+            background-color: #5cb85c;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #4cae4c;
+        }
+    </style>
+</head>
+<body>
+<div class="form-container">
+    <h1>Создание команды</h1>
+    <form id="team-form">
+        <label for="nomination">Наименование команды:</label>
+        <input type="text" id="nomination" name="nomination" required>
+
+        <label for="team_class">Класс команды:</label>
+        <input type="text" id="team_class" name="team_class" required>
+
+        <button type="submit">Создать команду</button>
+    </form>
+</div>
+
+<script>
+    document.getElementById('team-form').addEventListener('submit', async function(event) {
+        event.preventDefault(); // Предотвращаем стандартное поведение формы
+
+        const nomination = document.getElementById('nomination').value;
+        const teamClass = document.getElementById('team_class').value;
+
+        // Создаем объект для отправки
+        const teamData = {
+            nomination: nomination,
+            team_class: teamClass
+        };
+
+        try {
+            const response = await fetch('/team/api/create', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(teamData) // Отправляем данные в формате JSON
+            });
+
+            if (response.ok) {
+                    window.location.href = `http://localhost:8080/employee/new`;
+            } else {
+                alert('Ошибка при создании команды.');
+            }
+        } catch (error) {
+            console.error('Ошибка:', error);
+            alert('Ошибка при создании команды.');
+        }
+    });
+</script>
+</body>
+</html>

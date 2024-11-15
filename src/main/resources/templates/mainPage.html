@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Меню</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" integrity="sha384-k6RqeWeci5ZR/Lv4MR0sA0FfDOMyXz5E6vC0C7u6Qj1e3R5xJ6X5QZ5k5R2n0F" crossorigin="anonymous">
+    <style>
+        @import url('https://fonts.googleapis.com/css?family=Roboto:100,300,400,700');
+        * {
+            margin: 0;
+            padding: 0;
+        }
+        body {
+            font-family: 'Roboto', sans-serif;
+        }
+        .burger-menu_button {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            z-index: 30;
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background-color: #FF6F20; /* Оранжевый */
+            transition: 0.4s;
+        }
+        .burger-menu_button:hover .burger-menu_lines {
+            filter: brightness(0.7);
+        }
+        .burger-menu_button:hover {
+            background-color: #E65C17; /* Темнее оранжевый */
+        }
+        .burger-menu_lines::before,
+        .burger-menu_lines::after,
+        .burger-menu_lines {
+            position: absolute;
+            width: 50px;
+            height: 3px;
+            background-color: #FFFFFF; /* Белый */
+            transition: 0.4s;
+        }
+        .burger-menu_lines {
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+        .burger-menu_lines::before {
+            content: '';
+            top: -12px;
+        }
+        .burger-menu_lines::after {
+            content: '';
+            top: 12px;
+        }
+        .burger-menu_active .burger-menu_lines {
+            background-color: transparent;
+        }
+        .burger-menu_active .burger-menu_lines::before {
+            top: 0;
+            transform: rotate(45deg);
+        }
+        .burger-menu_active .burger-menu_lines::after {
+            top: 0;
+            transform: rotate(-45deg);
+        }
+        .burger-menu_nav {
+            padding-top: 120px;
+            position: fixed;
+            top: 0;
+            z-index: 20;
+            display: flex;
+            flex-flow: column;
+            height: 100%;
+            background-color: #FF6F20; /* Оранжевый */
+            overflow-y: auto;
+            right: -100%;
+            transition: 0.8s;
+        }
+        .burger-menu_active .burger-menu_nav {
+            right: 0;
+            transition: 0.4s;
+        }
+        .burger-menu_link {
+            padding: 18px 35px;
+            font-family: 'Roboto', sans-serif;
+            font-size: 18px;
+            text-decoration: none;
+            text-transform: uppercase;
+            letter-spacing: 5px;
+            font-weight: 400;
+            color: #FFFFFF; /* Белый */
+            border-bottom: 1px solid #FFFFFF; /* Белый */
+        }
+        .burger-menu_link:first-child {
+            border-top: 1px solid #FFFFFF; /* Белый */
+        }
+        .burger-menu_link:hover {
+            background-color: #E65C17; /* Темнее оранжевый */
+        }
+        .burger-menu_overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: 10;
+            background-color: rgba(0, 0, 0, 0.5); /* Полупрозрачный черный */
+        }
+        .burger-menu_active .burger-menu_overlay {
+            display: block;
+        }
+        section {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            font-family: 'Roboto', sans-serif;
+            font-size: 72px;
+            text-transform: uppercase;
+            color: #000000; /* Черный */
+            position: relative;
+            flex-direction: column; /* Изменено для вертикального расположения */
+            overflow: hidden; /* Скрываем выход за пределы секции */
+        }
+        #section-1 {
+            background-image: url("https://images.pexels.com/photos/1813272/pexels-photo-1813272.jpeg?auto=compress&cs=tinysrgb&dpr=2&w=500");
+            background-attachment: fixed;
+             background-color: #FFCC00; /* Желтый */
+            background-size: cover;
+            color: #FF6F20; /* Оранжевый */
+        }
+        #section-2 {
+            color: #000000; /* Черный */
+        }
+        #section-3 {
+            background-color: #0099CC; /* Синий */
+            color: #FFFFFF; /* Белый */
+        }
+        #section-4 {
+            background-color: #FF5733; /* Красный */
+            color: #FFFFFF; /* Белый */
+        }
+        .background-text {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            z-index: 0;
+            opacity: 0.1; /* Полупрозрачный текст */
+            font-size: 5rem; /* Размер шрифта */
+            font-weight: bold;
+            text-align: center;
+            pointer-events: none; /* Отключаем взаимодействие с текстом */
+        }
+        .background-text div {
+            position: absolute;
+            transform-origin: center;
+        }
+        .background-text.section-1 div:nth-child(1) {
+            color: #3b8a3a;
+            transform: rotate(-20deg);
+            left: 10%;
+            top: 20%;
+        }
+        .background-text.section-1 div:nth-child(2) {
+            color: #ff6f20;
+            transform: rotate(15deg);
+            left: 20%;
+            top: 40%;
+        }
+        .background-text.section-1 div:nth-child(3) {
+            color: #3b8a3a;
+            transform: rotate(-10deg);
+            left: 30%;
+            top: 60%;
+        }
+        .background-text.section-2 div:nth-child(1) {
+            color: #ff6f20;
+            transform: rotate(5deg);
+            left: 40%;
+            top: 20%;
+        }
+        .background-text.section-2 div:nth-child(2) {
+            color: #3b8a3a;
+            transform: rotate(25deg);
+            left: 50%;
+            top: 40%;
+        }
+        .background-text.section-2 div:nth-child(3) {
+            color: #ff6f20;
+            transform: rotate(-15deg);
+            left: 60%;
+            top: 60%;
+        }
+        .background-text.section-3 div:nth-child(1) {
+            color: #3b8a3a;
+            transform: rotate(10deg);
+            left: 70%;
+            top: 20%;
+        }
+        .background-text.section-3 div:nth-child(2) {
+            color: #ff6f20;
+            transform: rotate(-5deg);
+            left: 80%;
+            top: 40%;
+        }
+        .background-text.section-3 div:nth-child(3) {
+            color: #3b8a3a;
+            transform: rotate(30deg);
+            left: 90%;
+            top: 60%;
+        }
+        .background-text.section-4 div:nth-child(1) {
+            color: #ff6f20;
+            transform: rotate(-25deg);
+            left: 10%;
+            top: 20%;
+        }
+        .background-text.section-4 div:nth-child(2) {
+            color: #3b8a3a;
+            transform: rotate(15deg);
+            left: 20%;
+            top: 40%;
+        }
+        .background-text.section-4 div:nth-child(3) {
+            color: #ff6f20;
+            transform: rotate(-10deg);
+            left: 30%;
+            top: 60%;
+        }
+        /* Добавляем фигуры на задний фон */
+        section::before,
+        section::after {
+            content: '';
+            position: absolute;
+            width: 100px;
+            height: 100px;
+            background-color: rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            z-index: -1;
+        }
+        #section-1::before {
+            top: 10%;
+            left: 10%;
+            width: 150px;
+            height: 150px;
+            background-color: rgba(255, 0, 0, 0.2);
+            transform: rotate(45deg);
+        }
+        #section-1::after {
+            bottom: 10%;
+            right: 10%;
+            width: 120px;
+            height: 120px;
+            background-color: rgba(0, 255, 0, 0.2);
+            transform: rotate(30deg);
+        }
+        #section-2::before {
+            top: 20%;
+            left: 20%;
+            width: 130px;
+            height: 130px;
+            background-color: rgba(0, 0, 255, 0.2);
+            transform: rotate(60deg);
+        }
+        #section-2::after {
+            bottom: 20%;
+            right: 20%;
+            width: 140px;
+            height: 140px;
+            background-color: rgba(255, 255, 0, 0.2);
+            transform: rotate(15deg);
+        }
+        #section-3::before {
+            top: 30%;
+            left: 30%;
+            width: 110px;
+            height: 110px;
+            background-color: rgba(255, 0, 255, 0.2);
+            transform: rotate(75deg);
+        }
+        #section-3::after {
+            bottom: 30%;
+            right: 30%;
+            width: 160px;
+            height: 160px;
+            background-color: rgba(0, 255, 255, 0.2);
+            transform: rotate(20deg);
+        }
+        #section-4::before {
+            top: 40%;
+            left: 40%;
+            width: 170px;
+            height: 170px;
+            background-color: rgba(255, 165, 0, 0.2);
+            transform: rotate(80deg);
+        }
+        #section-4::after {
+            bottom: 40%;
+            right: 40%;
+            width: 180px;
+            height: 180px;
+            background-color: rgba(128, 0, 128, 0.2);
+            transform: rotate(25deg);
+        }
+    </style>
+</head>
+<body>
+<div class="burger-menu">
+    <a href="" class="burger-menu_button">
+        <span class="burger-menu_lines"></span>
+    </a>
+    <nav class="burger-menu_nav">
+        <a th:href="@{/employee/new}" class="burger-menu_link">Карты Таро/Космограмма</a>
+        <a th:href="@{/employee/all_with_team}" class="burger-menu_link">Статистика</a>
+        <a href="#section-4" class="burger-menu_link">Чат-Бот</a>
+    </nav>
+    <div class="burger-menu_overlay"></div>
+</div>
+<section id="section-1">
+    <h1>Карты Таро</h1>
+    <div class="background-text section-1">
+        <div>🪄 Магия</div>
+        <div>🔮 Гадание</div>
+        <div>🧙‍♀️ Баба Яга</div>
+    </div>
+</section>
+<section id="section-2">
+    <h1>Космограммы</h1>
+    <div class="background-text section-2">
+        <div>🌌 Звезды</div>
+        <div>🔭 Астрология</div>
+        <div>🌠 Гадания</div>
+    </div>
+</section>
+<section id="section-3">
+    <h1>Статистика</h1>
+    <div class="background-text section-3">
+        <div>📊 Отчеты</div>
+        <div>📈 Диаграммы</div>
+        <div>📉 Анализ</div>
+    </div>
+</section>
+<section id="section-4">
+    <h1>Чат-Бот</h1>
+    <div class="background-text section-4">
+        <div>🤖 Помощь</div>
+        <div>💬 Общение</div>
+        <div>🗣️ Вопросы</div>
+    </div>
+</section>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    function burgerMenu(selector) {
+        let menu = $(selector);
+        let button = menu.find('.burger-menu_button', '.burger-menu_lines');
+        let links = menu.find('.burger-menu_link');
+        let overlay = menu.find('.burger-menu_overlay');
+        button.on('click', (e) => {
+            e.preventDefault();
+            toggleMenu();
+        });
+        links.on('click', () => toggleMenu());
+        overlay.on('click', () => toggleMenu());
+        function toggleMenu() {
+            menu.toggleClass('burger-menu_active');
+            if (menu.hasClass('burger-menu_active')) {
+                $('body').css('overflow', 'hidden');
+            } else {
+                $('body').css('overflow', 'visible');
+            }
+        }
+    }
+    burgerMenu('.burger-menu');
+</script>
+</body>
+</html>
